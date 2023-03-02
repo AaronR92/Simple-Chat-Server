@@ -2,6 +2,7 @@ package io.github.aaronr92.client;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -27,6 +28,9 @@ public class ChatClient {
     }
 
     public void start() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter your name: ");
+        String name = scanner.nextLine();
         EventLoopGroup group = new NioEventLoopGroup();
 
         try {
@@ -35,14 +39,17 @@ public class ChatClient {
                     .channel(NioSocketChannel.class)
                     .handler(new ChatClientInitializer());
 
-            Channel channel = bootstrap.connect(host, port).sync().channel();
-            System.out.println("connected to " + channel.remoteAddress() + " as " + channel.localAddress());
-            Scanner scanner = new Scanner(System.in);
+            ChannelFuture future = bootstrap.connect(host, port).sync();
+            System.out.println("connected");
 
-            while (true) {
-                String message = scanner.nextLine() + "\r\n";
-                channel.write(message);
+            while (scanner.hasNext()) {
+                String message = scanner.nextLine();
+                Channel c = future.sync().channel();
+                c.writeAndFlush(name + "-" + message);
+                c.flush();
             }
+
+            future.channel().closeFuture().sync();
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         } finally {

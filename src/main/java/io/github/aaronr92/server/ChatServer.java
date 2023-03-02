@@ -1,6 +1,7 @@
 package io.github.aaronr92.server;
 
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
@@ -29,7 +30,9 @@ public class ChatServer {
                     .channel(NioServerSocketChannel.class)
                     .childHandler(new ChatServerInitializer());
 
-            bootstrap.bind(port).sync().channel().closeFuture().sync();
+            ChannelFuture f = bootstrap.bind(port).sync();
+
+            f.channel().closeFuture().sync();
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         } finally {

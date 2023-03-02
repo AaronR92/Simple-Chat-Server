@@ -3,19 +3,21 @@ package io.github.aaronr92.server;
 import io.netty.channel.*;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
+import io.netty.util.concurrent.GlobalEventExecutor;
 
-public class ChatServerHandler extends ChannelInboundMessageHandlerAdapter<String> {
+import java.util.ArrayList;
+import java.util.List;
 
-    private static final ChannelGroup channels = new DefaultChannelGroup();
+public class ChatServerHandler extends SimpleChannelInboundHandler<String> {
 
-
+    private static final List<Channel> channels = new ArrayList<>();
 
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
         Channel incoming = ctx.channel();
         for (Channel channel :
                 channels) {
-            channel.write("<Server> " + incoming.remoteAddress() + " has joined the party!\n");
+            channel.writeAndFlush("<Server> " + incoming.remoteAddress() + " has joined the party!");
         }
         channels.add(incoming);
 
@@ -27,7 +29,7 @@ public class ChatServerHandler extends ChannelInboundMessageHandlerAdapter<Strin
         Channel incoming = ctx.channel();
         for (Channel channel :
                 channels) {
-            channel.write("<Server> " + incoming.remoteAddress() + " has left the chat!\n");
+            channel.writeAndFlush("<Server> " + incoming.remoteAddress() + " has left the chat!");
         }
         channels.remove(incoming);
 
@@ -35,13 +37,14 @@ public class ChatServerHandler extends ChannelInboundMessageHandlerAdapter<Strin
     }
 
     @Override
-    public void messageReceived(ChannelHandlerContext channelHandlerContext, String message) throws Exception {
+    public void channelRead0(ChannelHandlerContext channelHandlerContext, String message) throws Exception {
         Channel incoming = channelHandlerContext.channel();
-        System.out.println("Message " + message);
+        System.out.println("<" + incoming.remoteAddress() + "> " + message);
+        String[] msg = message.split("-");
         for (Channel c :
                 channels) {
             if (c != incoming) {
-                c.write("<" + incoming.remoteAddress() + "> " + message + "\n");
+                c.writeAndFlush("<" + msg[0] + "> " + msg[1]);
             }
         }
     }

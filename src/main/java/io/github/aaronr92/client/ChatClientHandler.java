@@ -2,12 +2,12 @@ package io.github.aaronr92.client;
 
 
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundMessageHandlerAdapter;
+import io.netty.channel.SimpleChannelInboundHandler;
 
-public class ChatClientHandler extends ChannelInboundMessageHandlerAdapter<String> {
+public class ChatClientHandler extends SimpleChannelInboundHandler<String> {
 
     @Override
-    public void messageReceived(ChannelHandlerContext channelHandlerContext, String s) throws Exception {
+    public void channelRead0(ChannelHandlerContext channelHandlerContext, String s) throws Exception {
         System.out.println(s);
     }
 }
