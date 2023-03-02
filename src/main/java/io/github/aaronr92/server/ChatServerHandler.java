@@ -3,11 +3,10 @@ package io.github.aaronr92.server;
 import io.netty.channel.*;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
-import io.netty.util.concurrent.GlobalEventExecutor;
 
-public class ChatServerHandler extends SimpleChannelInboundHandler<String> {
+public class ChatServerHandler extends ChannelInboundMessageHandlerAdapter<String> {
 
-    private static final ChannelGroup channels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
+    private static final ChannelGroup channels = new DefaultChannelGroup();
 
 
 
@@ -16,7 +15,7 @@ public class ChatServerHandler extends SimpleChannelInboundHandler<String> {
         Channel incoming = ctx.channel();
         for (Channel channel :
                 channels) {
-            channel.writeAndFlush("<Server> " + incoming.remoteAddress() + " has joined the party!\n");
+            channel.write("<Server> " + incoming.remoteAddress() + " has joined the party!\n");
         }
         channels.add(incoming);
 
@@ -28,7 +27,7 @@ public class ChatServerHandler extends SimpleChannelInboundHandler<String> {
         Channel incoming = ctx.channel();
         for (Channel channel :
                 channels) {
-            channel.writeAndFlush("<Server> " + incoming.remoteAddress() + " has left the chat!\n");
+            channel.write("<Server> " + incoming.remoteAddress() + " has left the chat!\n");
         }
         channels.remove(incoming);
 
@@ -36,12 +35,14 @@ public class ChatServerHandler extends SimpleChannelInboundHandler<String> {
     }
 
     @Override
-    protected void channelRead0(ChannelHandlerContext channelHandlerContext, String message) throws Exception {
+    public void messageReceived(ChannelHandlerContext channelHandlerContext, String message) throws Exception {
         Channel incoming = channelHandlerContext.channel();
         System.out.println("Message " + message);
         for (Channel c :
                 channels) {
-            c.writeAndFlush("<" + incoming.remoteAddress() + "> " + message + "\n");
+            if (c != incoming) {
+                c.write("<" + incoming.remoteAddress() + "> " + message + "\n");
+            }
         }
     }
 }

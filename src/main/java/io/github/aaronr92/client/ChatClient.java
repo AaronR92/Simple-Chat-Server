@@ -42,7 +42,6 @@ public class ChatClient {
             while (true) {
                 String message = scanner.nextLine() + "\r\n";
                 channel.write(message);
-                System.out.println(message);
             }
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
