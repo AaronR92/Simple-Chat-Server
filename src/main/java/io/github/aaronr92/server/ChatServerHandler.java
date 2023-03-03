@@ -40,7 +40,7 @@ public class ChatServerHandler extends SimpleChannelInboundHandler<String> {
     public void channelRead0(ChannelHandlerContext channelHandlerContext, String message) throws Exception {
         Channel incoming = channelHandlerContext.channel();
         System.out.println("<" + incoming.remoteAddress() + "> " + message);
-        String[] msg = message.split("-");
+        String[] msg = message.split("!-!");
         for (Channel c :
                 channels) {
             if (c != incoming) {

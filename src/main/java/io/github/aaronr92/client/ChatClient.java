@@ -43,9 +43,10 @@ public class ChatClient {
             System.out.println("connected");
 
             while (scanner.hasNext()) {
+                System.out.print("<" + name + "> ");
                 String message = scanner.nextLine();
                 Channel c = future.sync().channel();
-                c.writeAndFlush(name + "-" + message);
+                c.writeAndFlush(name + "!-!" + message);
                 c.flush();
             }
 
